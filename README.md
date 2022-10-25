@@ -4,6 +4,10 @@
 
 Featuring flash loans, price oracles, governance, NFTs, lending pools, smart contract wallets, timelocks, and more!
 
+## Solutions
+
+My explanations for each of the challenge solutions would be found either in the test file or in the parent smart contract used for solving, wherever applicable.
+
 ## Play
 
 Visit [damnvulnerabledefi.xyz](https://damnvulnerabledefi.xyz)
